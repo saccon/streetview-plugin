@@ -14,8 +14,8 @@ about =Streetview allows you to open a web page with the Google Street View that
 tags=StreetView,Google
 
 homepage=http://www.gisplan.it/
-tracker=http://rubyforge.org/projects/gisplan/
-repository=http://hub.qgis.org/projects/gisplan/
+tracker=https://github.com/saccon/streetview-plugin
+repository=https://github.com/saccon/streetview-plugin
 icon=icon.png
 
 experimental=False
