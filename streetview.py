@@ -81,8 +81,13 @@ class StreetView:
         self.iface.removeToolBarIcon(self.action)
 
     def run(self): 
-
-       
+        # Get google streetview wms (the blue lines) and add it to the layer tree
+        uri = "type=xyz&url=https://mts2.google.com/mapslt?lyrs%3Dsvv%26x%3D%7Bx%7D%26y%3D%7By%7D%26z%3D%7Bz%7D%26w%3D256%26h%3D256%26hl%3Den%26style%3D40,18&zmax=18&zmin=0&http-header:referer="
+        rlayer = QgsRasterLayer(uri, 'StreetView Abdeckung', 'wms')
+        if rlayer.isValid():
+            root = QgsProject.instance().layerTreeRoot()
+            QgsProject.instance().addMapLayer(rlayer, False)
+            root.insertLayer(0, rlayer)
         tool = PointTool(self.iface.mapCanvas())
         self.iface.mapCanvas().setMapTool(tool)  
     
@@ -143,6 +148,10 @@ class PointTool(QgsMapTool):
             rl.reset()
             rb.reset()           
             self.canvas.unsetMapTool(self)           
+            
+            # Remove streetview layer
+            QgsProject.instance().removeMapLayers([x for x in QgsProject.instance().mapLayers() if 'StreetView' in x])
+            self.canvas.refresh()
         def activate(self):
             pass
     
