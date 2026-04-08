@@ -25,22 +25,19 @@ from qgis.core import *
 from qgis.gui import *
 from qgis.utils import *
 from .resources_rc import *
+
+from qgis.PyQt.QtCore import Qt, QEventLoop, QVariant
+from qgis.PyQt.QtWidgets import QAction, QMessageBox, QInputDialog, QPushButton
+from qgis.PyQt.QtGui import QIcon, QColor
+
 # Import the code for the dialog
 import os.path
 import math
 import webbrowser  
-QT6=0
-for name, value in os.environ.items():
-    if value.lower().find('qt6')>0:
-        QT6=1
-# Import the PyQt and QGIS libraries
-if   QT6== 1:
-    from PyQt6 import  QtCore, QtWidgets, QtGui,  QtXml, QtNetwork, uic
-    from PyQt6.QtGui import QAction, QColor
-elif QT6== 0:
-    from PyQt5 import Qt, QtCore, QtWidgets, QtGui, QtWebKit, QtWebKitWidgets, QtXml, QtNetwork, uic
-    from PyQt5.QtGui import  QColor
-    from PyQt5.QtWidgets import QAction
+
+
+
+
 from .resources_rc import *    
     
 rb=QgsRubberBand(iface.mapCanvas(),QgsWkbTypes.GeometryType.PointGeometry )
@@ -71,7 +68,7 @@ class StreetView:
 
 
     def initGui(self):
-        self.action = QAction(QtGui.QIcon(":/plugins/streetview/icon.png"),u"StreetView", self.iface.mainWindow())
+        self.action = QAction(QIcon(":/plugins/streetview/icon.png"),u"StreetView", self.iface.mainWindow())
         self.action.triggered.connect(self.run)
         self.iface.addToolBarIcon(self.action)
         self.iface.addPluginToMenu(u"&StreetView", self.action)
@@ -81,8 +78,13 @@ class StreetView:
         self.iface.removeToolBarIcon(self.action)
 
     def run(self): 
-
-       
+        # Get google streetview wms (the blue lines) and add it to the layer tree
+        uri = "type=xyz&url=https://mts2.google.com/mapslt?lyrs%3Dsvv%26x%3D%7Bx%7D%26y%3D%7By%7D%26z%3D%7Bz%7D%26w%3D256%26h%3D256%26hl%3Den%26style%3D40,18&zmax=18&zmin=0&http-header:referer="
+        rlayer = QgsRasterLayer(uri, 'StreetView Abdeckung', 'wms')
+        if rlayer.isValid():
+            root = QgsProject.instance().layerTreeRoot()
+            QgsProject.instance().addMapLayer(rlayer, False)
+            root.insertLayer(0, rlayer)
         tool = PointTool(self.iface.mapCanvas())
         self.iface.mapCanvas().setMapTool(tool)  
     
@@ -143,6 +145,10 @@ class PointTool(QgsMapTool):
             rl.reset()
             rb.reset()           
             self.canvas.unsetMapTool(self)           
+            
+            # Remove streetview layer
+            QgsProject.instance().removeMapLayers([x for x in QgsProject.instance().mapLayers() if 'StreetView' in x])
+            self.canvas.refresh()
         def activate(self):
             pass
     
