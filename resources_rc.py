@@ -6,16 +6,7 @@
 #
 # WARNING! All changes made in this file will be lost!
 import os.path
-QT6=0
-for name, value in os.environ.items():
-    if value.lower().find('qt6')>0:
-        QT6=1
-# Import the PyQt and QGIS libraries
-if   QT6== 1:
-    from PyQt6 import  QtCore
-elif QT6== 0:
-    from PyQt5 import QtCore
-
+from qgis.PyQt import QtCore
 
 qt_resource_data = b"\
 \x00\x00\x28\x93\
